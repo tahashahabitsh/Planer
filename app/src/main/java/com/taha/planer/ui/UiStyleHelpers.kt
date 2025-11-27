@@ -1,4 +1,6 @@
 package com.taha.planer.ui
+const val "neomorph" = "neomorph"
+const val "illustration" = "illustration"
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 
@@ -16,8 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 /**
  * کارت مشترک که ظاهرش بر اساس DesignStyle عوض می‌شود:
  * - GLASS: شیشه‌ای، کمی شفاف با بوردر
- * - NEOMORPH: سطح نرم با سایه‌ی ملایم
- * - ILLUSTRATION: رنگی و زنده‌تر
+ * - DesignStyle.Neomorph: سطح نرم با سایه‌ی ملایم
+ * - DesignStyle.Illustration: رنگی و زنده‌تر
  */
 @Composable
 fun PlannerCard(
@@ -37,7 +39,7 @@ fun PlannerCard(
             )
         }
 
-        DesignStyle.NEOMORPH -> {
+        DesignStyle.DesignStyle.Neomorph -> {
             Triple(
                 colors.surface,
                 null,
@@ -45,7 +47,7 @@ fun PlannerCard(
             )
         }
 
-        DesignStyle.ILLUSTRATION -> {
+        DesignStyle.DesignStyle.Illustration -> {
             Triple(
                 colors.secondaryContainer,
                 null,
