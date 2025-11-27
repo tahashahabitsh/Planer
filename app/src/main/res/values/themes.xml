@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- تم پایه‌ی اپ؛ بیشتر UI را Compose مدیریت می‌کند -->
+    <style name="Theme.Planer" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <!-- اگر بعداً لازم شد می‌تونیم رنگ و استایل بیشتری اینجا اضافه کنیم -->
+    </style>
+</resources>
