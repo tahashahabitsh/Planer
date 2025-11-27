@@ -1,4 +1,6 @@
 package com.taha.planer.ui
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
