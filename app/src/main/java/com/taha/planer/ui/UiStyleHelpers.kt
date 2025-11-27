@@ -1,4 +1,5 @@
 package com.taha.planer.ui
+enum class DesignStyle { Glass, Neomorph, Illustration }
 const val "neomorph" = "neomorph"
 const val "illustration" = "illustration"
 import androidx.compose.material3.Shapes
