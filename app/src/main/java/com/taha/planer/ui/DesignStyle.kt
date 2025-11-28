@@ -1,13 +1,14 @@
 package com.taha.planer.ui
 
 /**
- * نوع کلی استایل UI اپ.
- * تمام صفحه‌ها همین enum رو استفاده می‌کنن.
+ * استایل‌های کلی UI که تو تنظیمات، کارت‌ها و داشبورد استفاده می‌کنیم.
+ *
+ * اسم‌ها رو ساده نگه می‌داریم (GLASS, NEOMORPH, ...) تا همه‌جا یکی باشه.
  */
 enum class DesignStyle {
-    Glass,
-    Neomorph,
-    Illustration,
-    System,
-    Default
+    GLASS,
+    NEOMORPH,
+    ILLUSTRATION,
+    SYSTEM,
+    DEFAULT,
 }
