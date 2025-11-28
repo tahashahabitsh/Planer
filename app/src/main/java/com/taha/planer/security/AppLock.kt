@@ -1,6 +1,6 @@
 package com.taha.planer.security
 
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.androidx.compose.foundation.text.KeyboardOptions
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -143,7 +143,7 @@ fun AppLockScreen(
                             label = { Text("پین") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(
+                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
                                 keyboardType = KeyboardType.NumberPassword
                             ),
                             modifier = Modifier.fillMaxWidth()
@@ -188,7 +188,7 @@ fun AppLockScreen(
                             label = { Text("پین (۴ تا ۱۰ رقم)") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(
+                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
                                 keyboardType = KeyboardType.NumberPassword
                             ),
                             modifier = Modifier.fillMaxWidth()
@@ -202,7 +202,7 @@ fun AppLockScreen(
                             label = { Text("تکرار پین") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(
+                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
                                 keyboardType = KeyboardType.NumberPassword
                             ),
                             modifier = Modifier.fillMaxWidth()
