@@ -459,7 +459,7 @@ private fun WeeklyMinutesChart(points: List<Int>) {
 
             drawPath(
                 path = path,
-                color = MaterialTheme.colorScheme.primary,
+                color = androidx.compose.ui.graphics.Color(0xFF4CAF50),
                 style = Stroke(width = 4f)
             )
         }

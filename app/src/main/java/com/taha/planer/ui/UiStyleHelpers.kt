@@ -85,3 +85,28 @@ fun plannerShapes(style: DesignStyle): Shapes = when (style) {
  * اگر بعداً خواستیم، می‌توانیم برای هر استایل جدا تنظیم کنیم.
  */
 fun plannerTypography(style: DesignStyle): Typography = Typography()
+
+/**
+ * برگردوندن لیبل فارسی برای استایل طراحی فعلی.
+ * اگه بعداً enum عوض شد، فقط متن‌ها رو اینجا آپدیت می‌کنیم.
+ */
+fun designStyleLabel(style: DesignStyle): String {
+    return when (style) {
+        DesignStyle.SYSTEM        -> "پیش‌فرض سیستم"
+        DesignStyle.GLASSMORPHISM -> "تم شیشه‌ای (Glassmorphism)"
+        DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
+        DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
+    }
+}
+
+/**
+ * برچسب فارسی برای استایل طراحی فعلی.
+ * فقط برای نمایش در تنظیمات استفاده می‌شود.
+ */
+fun designStyleLabel(style: DesignStyle): String =
+    when (style) {
+        DesignStyle.SYSTEM        -> "پیش‌فرض سیستم"
+        DesignStyle.GLASSMORPHISM -> "تم شیشه‌ای (Glassmorphism)"
+        DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
+        DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
+    }
