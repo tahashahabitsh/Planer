@@ -1,18 +1,13 @@
 package com.taha.planer.ui
 
 /**
- * نوع استایل کلی UI که برای تم‌ها و Helper های UI استفاده می‌کنیم.
- *
- * - GLASSMORPHISM: تم شیشه‌ای
- * - NEOMORPHISM: تم نئومورف
- * - ILLUSTRATION: تم همراه با ایلاستریشن
- * - SYSTEM: استفاده از تنظیمات سیستم
- * - DEFAULT: حالت پیش‌فرض اپ
+ * نوع کلی استایل UI اپ.
+ * تمام صفحه‌ها همین enum رو استفاده می‌کنن.
  */
 enum class DesignStyle {
-    GLASSMORPHISM,
-    NEOMORPHISM,
-    ILLUSTRATION,
-    SYSTEM,
-    DEFAULT
+    Glass,
+    Neomorph,
+    Illustration,
+    System,
+    Default
 }
