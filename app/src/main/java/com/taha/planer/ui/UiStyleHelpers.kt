@@ -94,8 +94,8 @@ fun designStyleLabel(style: DesignStyle): String {
     return when (style) {
         DesignStyle.SYSTEM        -> "پیش‌فرض سیستم"
         DesignStyle.GLASSMORPHISM -> "تم شیشه‌ای (Glassmorphism)"
-        DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
-        DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
+        DesignStyle.DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
+        DesignStyle.DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
     }
 }
 
@@ -107,6 +107,6 @@ fun designStyleLabel(style: DesignStyle): String =
     when (style) {
         DesignStyle.SYSTEM        -> "پیش‌فرض سیستم"
         DesignStyle.GLASSMORPHISM -> "تم شیشه‌ای (Glassmorphism)"
-        DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
-        DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
+        DesignStyle.DesignStyle.NEOMORPHISM   -> "تم نرم (Neumorphism)"
+        DesignStyle.DesignStyle.ILLUSTRATION  -> "تم تصویرمحور (Illustration)"
     }
