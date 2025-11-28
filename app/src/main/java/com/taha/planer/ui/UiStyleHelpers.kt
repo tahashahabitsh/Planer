@@ -1,6 +1,6 @@
-package 
-import com.taha.planer.ui.DesignStylecom.taha.planer.ui
-import com.taha.planer.ui.DesignStyle
+package com.taha.planer.ui
+
+
 
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -13,11 +13,7 @@ import androidx.compose.ui.graphics.Color
 /**
  * سه سبک کلی طراحی برای کل اپ.
  */
-enum class DesignStyle {
-    Glass,
-    Neomorph,
-    Illustration
-}
+
 
 /**
  * تبدیل یک رشته‌ی ذخیره‌شده در SharedPreferences به DesignStyle.
