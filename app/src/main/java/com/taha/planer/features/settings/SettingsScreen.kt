@@ -229,3 +229,15 @@ private fun AppearanceInfoCard() {
         }
     }
 }
+
+// Local UI settings that we keep in memory / prefs
+data class LocalUiSettings(
+    val designStyle: DesignStyle = DesignStyle.SYSTEM,
+    val colorMode: ColorMode = ColorMode.SYSTEM,
+)
+
+// Local UI settings that we keep in memory / prefs
+data class LocalUiSettings(
+    val designStyle: DesignStyle = DesignStyle.SYSTEM,
+    val colorMode: ColorMode = ColorMode.SYSTEM,
+)
