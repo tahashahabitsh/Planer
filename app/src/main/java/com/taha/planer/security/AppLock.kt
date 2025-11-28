@@ -25,8 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.taha.planer.ui.PlannerCard
@@ -74,10 +72,6 @@ fun verifyAppLockPin(context: Context, pin: String): Boolean {
 
 // -------------------- UI تنظیمات قفل برنامه --------------------
 
-/**
- * صفحه‌ی تنظیم قفل برنامه (PIN)
- * این همون جاییه که از Security/Settings بهش می‌رسی.
- */
 @Composable
 fun AppLockSettingsScreen() {
     val context = LocalContext.current
@@ -133,7 +127,6 @@ fun AppLockSettingsScreen() {
                     checked = isEnabled,
                     onCheckedChange = { checked ->
                         if (checked) {
-                            // اگر PIN نداریم، اول از کاربر می‌خواهیم بسازد
                             if (!hasPin) {
                                 showPinDialog = true
                             } else {
@@ -293,9 +286,6 @@ private fun PinEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("PIN جدید") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword
-                    ),
                     visualTransformation = PasswordVisualTransformation()
                 )
 
@@ -309,9 +299,6 @@ private fun PinEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("تکرار PIN") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword
-                    ),
                     visualTransformation = PasswordVisualTransformation()
                 )
 
