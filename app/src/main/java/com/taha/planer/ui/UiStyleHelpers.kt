@@ -1,73 +1,87 @@
 package com.taha.planer.ui
-enum class DesignStyle { Glass, Neomorph, Illustration }
-const val "neomorph" = "neomorph"
-const val "illustration" = "illustration"
+
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
-
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 
 /**
- * کارت مشترک که ظاهرش بر اساس DesignStyle عوض می‌شود:
- * - GLASS: شیشه‌ای، کمی شفاف با بوردر
- * - DesignStyle.Neomorph: سطح نرم با سایه‌ی ملایم
- * - DesignStyle.Illustration: رنگی و زنده‌تر
+ * سه سبک کلی طراحی برای کل اپ.
+ */
+enum class DesignStyle {
+    Glass,
+    Neomorph,
+    Illustration
+}
+
+/**
+ * تبدیل یک رشته‌ی ذخیره‌شده در SharedPreferences به DesignStyle.
+ * اگر مقدار ناشناس باشد، حالت Glass برمی‌گردد.
+ */
+fun parseDesignStyle(raw: String?): DesignStyle =
+    when (raw) {
+        "Neomorph" -> DesignStyle.Neomorph
+        "Illustration" -> DesignStyle.Illustration
+        "Glass" -> DesignStyle.Glass
+        else -> DesignStyle.Glass
+    }
+
+/**
+ * رنگ کارت‌ها بر اساس استایل.
  */
 @Composable
-fun PlannerCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    val ui = LocalUiSettings.current
-    val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(24.dp)
+fun plannerCardColors(style: DesignStyle) = when (style) {
+    DesignStyle.Glass -> CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+        contentColor = MaterialTheme.colorScheme.onSurface
+    )
 
-    val (bgColor, border, elevation) = when (ui.designStyle) {
-        DesignStyle.GLASS -> {
-            Triple(
-                colors.primary.copy(alpha = 0.08f),
-                BorderStroke(1.dp, colors.primary.copy(alpha = 0.4f)),
-                0.dp
-            )
-        }
+    DesignStyle.Neomorph -> CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    )
 
-        DesignStyle.DesignStyle.Neomorph -> {
-            Triple(
-                colors.surface,
-                null,
-                8.dp
-            )
-        }
-
-        DesignStyle.DesignStyle.Illustration -> {
-            Triple(
-                colors.secondaryContainer,
-                null,
-                4.dp
-            )
-        }
-    }
-
-    Surface(
-        modifier = modifier,
-        color = bgColor,
-        contentColor = colors.onSurface,
-        shape = shape,
-        tonalElevation = elevation,
-        shadowElevation = elevation,
-        border = border
-    ) {
-        Box(modifier = Modifier.padding(12.dp)) {
-            content()
-        }
-    }
+    DesignStyle.Illustration -> CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    )
 }
+
+/**
+ * شکل‌ها (گوشه‌ی کارت‌ها و …) بر اساس استایل.
+ * این تابع ساده است ولی برای کامپایل کامل کافی است.
+ */
+fun plannerShapes(style: DesignStyle): Shapes = when (style) {
+    DesignStyle.Glass -> Shapes(
+        extraSmall = ShapeDefaults.ExtraSmall,
+        small = ShapeDefaults.Small,
+        medium = ShapeDefaults.Medium,
+        large = ShapeDefaults.Large,
+        extraLarge = ShapeDefaults.ExtraLarge
+    )
+
+    DesignStyle.Neomorph -> Shapes(
+        extraSmall = ShapeDefaults.ExtraSmall,
+        small = ShapeDefaults.Small,
+        medium = ShapeDefaults.Medium,
+        large = ShapeDefaults.Large,
+        extraLarge = ShapeDefaults.ExtraLarge
+    )
+
+    DesignStyle.Illustration -> Shapes(
+        extraSmall = ShapeDefaults.ExtraSmall,
+        small = ShapeDefaults.Small,
+        medium = ShapeDefaults.Medium,
+        large = ShapeDefaults.Large,
+        extraLarge = ShapeDefaults.ExtraLarge
+    )
+}
+
+/**
+ * تایپوگرافی واحد برای همه‌ی استایل‌ها.
+ * اگر بعداً خواستیم، می‌توانیم برای هر استایل جدا تنظیم کنیم.
+ */
+fun plannerTypography(style: DesignStyle): Typography = Typography()
