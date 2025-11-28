@@ -1,4 +1,5 @@
-package com.taha.planer.ui
+package 
+import com.taha.planer.ui.DesignStylecom.taha.planer.ui
 import com.taha.planer.ui.DesignStyle
 
 import androidx.compose.material3.CardDefaults
