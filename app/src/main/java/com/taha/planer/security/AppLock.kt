@@ -1,16 +1,23 @@
 package com.taha.planer.security
 
-import androidx.compose.foundation.text.androidx.compose.foundation.text.KeyboardOptions
-
 import android.content.Context
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,230 +25,331 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.text.androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import java.security.MessageDigest
+import com.taha.planer.ui.PlannerCard
 
-private const val PREF_APP_SECURITY = "planner_app_security"
-private const val KEY_PIN_HASH = "app_pin_hash"
-private const val KEY_FLAG_SECURE = "flag_secure_enabled"
-private const val KEY_PIN_ENABLED = "app_pin_enabled"
+// -------------------- ذخیره‌سازی ساده برای قفل برنامه --------------------
 
-// ---------- وضعیت پین برنامه ----------
+private const val PREF_APP_LOCK = "planner_app_lock"
+private const val KEY_APP_LOCK_ENABLED = "app_lock_enabled"
+private const val KEY_APP_LOCK_PIN = "app_lock_pin"
 
-fun hasAppPin(context: Context): Boolean {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    return prefs.getString(KEY_PIN_HASH, "").orEmpty().isNotEmpty()
-}
+private fun prefs(context: Context) =
+    context.getSharedPreferences(PREF_APP_LOCK, Context.MODE_PRIVATE)
 
 fun isAppLockEnabled(context: Context): Boolean {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    return prefs.getBoolean(KEY_PIN_ENABLED, false)
+    val p = prefs(context)
+    val enabled = p.getBoolean(KEY_APP_LOCK_ENABLED, false)
+    val pin = p.getString(KEY_APP_LOCK_PIN, null)
+    return enabled && !pin.isNullOrBlank()
+}
+
+fun isAppLockConfigured(context: Context): Boolean {
+    val pin = prefs(context).getString(KEY_APP_LOCK_PIN, null)
+    return !pin.isNullOrBlank()
 }
 
 fun setAppLockEnabled(context: Context, enabled: Boolean) {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    prefs.edit().putBoolean(KEY_PIN_ENABLED, enabled).apply()
+    prefs(context).edit().putBoolean(KEY_APP_LOCK_ENABLED, enabled).apply()
 }
 
-private fun hashPin(pin: String): String {
-    val md = MessageDigest.getInstance("SHA-256")
-    val bytes = md.digest(pin.toByteArray(Charsets.UTF_8))
-    return bytes.joinToString("") { "%02x".format(it) }
+fun saveAppLockPin(context: Context, pin: String) {
+    prefs(context).edit().putString(KEY_APP_LOCK_PIN, pin).apply()
 }
 
-fun verifyAppPin(context: Context, pin: String): Boolean {
-    if (pin.isBlank()) return false
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    val stored = prefs.getString(KEY_PIN_HASH, "") ?: ""
-    if (stored.isEmpty()) return false
-    return stored == hashPin(pin)
-}
-
-fun saveAppPin(context: Context, pin: String) {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    prefs.edit().putString(KEY_PIN_HASH, hashPin(pin)).apply()
-    // اگر پین تنظیم می‌شود، منطقی است که قفل برنامه فعال باشد
-    prefs.edit().putBoolean(KEY_PIN_ENABLED, true).apply()
-}
-
-fun clearAppPin(context: Context) {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    prefs.edit()
-        .remove(KEY_PIN_HASH)
-        .putBoolean(KEY_PIN_ENABLED, false)
+fun clearAppLock(context: Context) {
+    prefs(context).edit()
+        .remove(KEY_APP_LOCK_PIN)
+        .putBoolean(KEY_APP_LOCK_ENABLED, false)
         .apply()
 }
 
-// ---------- فلگ جلوگیری از اسکرین‌شات ----------
-
-fun isSecureFlagEnabled(context: Context): Boolean {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    return prefs.getBoolean(KEY_FLAG_SECURE, false)
+fun verifyAppLockPin(context: Context, pin: String): Boolean {
+    val saved = prefs(context).getString(KEY_APP_LOCK_PIN, null)
+    return !saved.isNullOrBlank() && saved == pin
 }
 
-fun setSecureFlagEnabled(context: Context, enabled: Boolean) {
-    val prefs = context.getSharedPreferences(PREF_APP_SECURITY, Context.MODE_PRIVATE)
-    prefs.edit().putBoolean(KEY_FLAG_SECURE, enabled).apply()
-}
+// -------------------- UI تنظیمات قفل برنامه --------------------
 
-// ---------- صفحه‌ی قفل برنامه ----------
-
+/**
+ * صفحه‌ی تنظیم قفل برنامه (PIN)
+ * این همون جاییه که از Security/Settings بهش می‌رسی.
+ */
 @Composable
-fun AppLockScreen(
-    onUnlocked: () -> Unit
-) {
+fun AppLockSettingsScreen() {
     val context = LocalContext.current
-    var hasPin by remember { mutableStateOf(hasAppPin(context)) }
-    var step by remember { mutableStateOf(if (hasPin) "enter" else "set") }
 
-    var pin by remember { mutableStateOf("") }
-    var confirmPin by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var isEnabled by remember { mutableStateOf(false) }
+    var hasPin by remember { mutableStateOf(false) }
+    var showPinDialog by remember { mutableStateOf(false) }
+    var showClearDialog by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxSize()
+    LaunchedEffect(Unit) {
+        isEnabled = isAppLockEnabled(context)
+        hasPin = isAppLockConfigured(context)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+        Text(
+            text = "قفل برنامه (PIN)",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        PlannerCard(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            ElevatedCard(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "قفل برنامه",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "فعال‌سازی قفل برنامه",
+                        style = MaterialTheme.typography.titleMedium
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = if (hasPin)
+                            "با فعال بودن این گزینه، برای ورود به اپ باید PIN وارد کنی."
+                        else
+                            "اول باید یک PIN بسازی، بعد می‌توانی قفل برنامه را فعال کنی.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
 
-                    if (step == "enter") {
-                        Text(
-                            text = "برای ورود، پین برنامه را وارد کن.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = pin,
-                            onValueChange = {
-                                if (it.length <= 10) pin = it.filter { ch -> ch.isDigit() }
-                            },
-                            label = { Text("پین") },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        if (error != null) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = error!!,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            // اگر PIN نداریم، اول از کاربر می‌خواهیم بسازد
+                            if (!hasPin) {
+                                showPinDialog = true
+                            } else {
+                                setAppLockEnabled(context, true)
+                                isEnabled = true
+                            }
+                        } else {
+                            setAppLockEnabled(context, false)
+                            isEnabled = false
                         }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+        PlannerCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "مدیریت PIN",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (hasPin)
+                        "در حال حاضر برای برنامه PIN تنظیم کرده‌ای. می‌توانی آن را تغییر بدهی یا پاک کنی."
+                    else
+                        "هنوز PIN تنظیم نکرده‌ای. از دکمه‌ی زیر برای ساخت آن استفاده کن.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                        Button(
-                            onClick = {
-                                if (verifyAppPin(context, pin)) {
-                                    error = null
-                                    onUnlocked()
-                                } else {
-                                    error = "پین اشتباه است."
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = { showPinDialog = true }
+                    ) {
+                        Text(if (hasPin) "تغییر PIN" else "ساخت PIN")
+                    }
+
+                    if (hasPin) {
+                        FilledTonalButton(
+                            onClick = { showClearDialog = true }
                         ) {
-                            Text("باز کردن قفل")
-                        }
-                    } else {
-                        Text(
-                            text = "اولین بار است. یک پین برای قفل برنامه تعیین کن.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = pin,
-                            onValueChange = {
-                                if (it.length <= 10) pin = it.filter { ch -> ch.isDigit() }
-                            },
-                            label = { Text("پین (۴ تا ۱۰ رقم)") },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = confirmPin,
-                            onValueChange = {
-                                if (it.length <= 10) confirmPin = it.filter { ch -> ch.isDigit() }
-                            },
-                            label = { Text("تکرار پین") },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = androidx.compose.ui.text.input.androidx.compose.foundation.text.KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        if (error != null) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = error!!,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Button(
-                            onClick = {
-                                if (pin.length < 4) {
-                                    error = "پین باید حداقل ۴ رقم باشد."
-                                    return@Button
-                                }
-                                if (pin != confirmPin) {
-                                    error = "پین و تکرار پین یکی نیستند."
-                                    return@Button
-                                }
-                                saveAppPin(context, pin)
-                                hasPin = true
-                                step = "enter"
-                                error = null
-                                onUnlocked()
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("ذخیره پین و ورود")
+                            Text("حذف PIN")
                         }
                     }
                 }
             }
         }
+
+        PlannerCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "نکات امنیتی",
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "PIN فقط روی همین دستگاه ذخیره می‌شود و جایی ارسال نمی‌شود. اگر برنامه را حذف کنی، PIN هم پاک می‌شود.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     }
+
+    if (showPinDialog) {
+        PinEditDialog(
+            initialHasPin = hasPin,
+            onDismiss = { showPinDialog = false },
+            onPinSaved = { newPin ->
+                saveAppLockPin(context, newPin)
+                setAppLockEnabled(context, true)
+                isEnabled = true
+                hasPin = true
+                showPinDialog = false
+            }
+        )
+    }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text("حذف PIN؟") },
+            text = {
+                Text(
+                    "با حذف PIN، قفل برنامه غیرفعال می‌شود و برای ورود به اپ دیگر رمزی لازم نیست."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        clearAppLock(context)
+                        isEnabled = false
+                        hasPin = false
+                        showClearDialog = false
+                    }
+                ) {
+                    Text("بله، حذف کن")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) {
+                    Text("بی‌خیال")
+                }
+            }
+        )
+    }
+}
+
+// -------------------- دیالوگ ساخت / تغییر PIN --------------------
+
+@Composable
+private fun PinEditDialog(
+    initialHasPin: Boolean,
+    onDismiss: () -> Unit,
+    onPinSaved: (String) -> Unit
+) {
+    var newPin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(if (initialHasPin) "تغییر PIN برنامه" else "ساخت PIN برای برنامه")
+        },
+        text = {
+            Column {
+                Text(
+                    text = "PIN باید حداقل ۴ رقم باشد. چیزی انتخاب کن که هم یادت بماند و هم قابل حدس زدن نباشد.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = newPin,
+                    onValueChange = { value ->
+                        newPin = value.filter { it.isDigit() }.take(8)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("PIN جدید") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword
+                    ),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = confirmPin,
+                    onValueChange = { value ->
+                        confirmPin = value.filter { it.isDigit() }.take(8)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("تکرار PIN") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword
+                    ),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                if (errorText != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = errorText!!,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    when {
+                        newPin.length < 4 -> {
+                            errorText = "PIN باید حداقل ۴ رقم باشد."
+                        }
+
+                        newPin != confirmPin -> {
+                            errorText = "PIN و تکرار آن یکی نیست."
+                        }
+
+                        else -> {
+                            onPinSaved(newPin)
+                        }
+                    }
+                }
+            ) {
+                Text("ذخیره")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("بی‌خیال")
+            }
+        }
+    )
 }
